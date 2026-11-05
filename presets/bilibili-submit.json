@@ -1,0 +1,104 @@
+{
+  "name": "bilibili-submit",
+  "desc": "B站投稿页（创作中心/bili-plus/upload）的预设选择器。用它装眼睛，专治：点开下拉看不到选项、提交了没反应、创作声明必填却没提示。",
+  "updated": "2026-11-05",
+  "notes": [
+    "这些选择器来自 2026-11-04/05 的实际踩坑（notes/2026-11-05-swap-video-30min-waste.md）：",
+    "· .title-text 是稿件标题，会一直骗你；判断换没换视频要看 .file-item 整体文本",
+    "· 真换视频只认 input[type=file][accept*='.mp4']:not([name])（页面另有 2 个 buploader 是假的）",
+    ".bcc-select 的选项列表极可能是纯 CSS display 展开 —— 不发 DOM 事件，只有样式采样看得见"
+  ],
+  "selectors": [
+    {
+      "key": "创作声明下拉",
+      "sel": ".bcc-select",
+      "why": "点开时大概率只改 display，DOM 不动（第②类）"
+    },
+    {
+      "key": "下拉选项列表",
+      "sel": ".bcc-select-list-wrap, .bcc-select-list",
+      "why": "真正的选项容器，display none->block 就是展开了"
+    },
+    {
+      "key": "稿件标题",
+      "sel": "input.title-input, .title-text",
+      "why": "标题框；注意 .title-text 也会指稿件标题，别拿来判断内容"
+    },
+    {
+      "key": "视频文件项",
+      "sel": ".file-item",
+      "why": "判断视频到底换没换，看这个整体文本，不看标题"
+    },
+    {
+      "key": "真·上传控件",
+      "sel": "input[type=file][accept*='.mp4']:not([name])",
+      "why": "页面另有 2 个 buploader 是假的，只有这个能真换"
+    },
+    {
+      "key": "分区选择",
+      "sel": ".bcc-select-tips, .part-item",
+      "why": "投稿分区（生活兴趣）"
+    },
+    {
+      "key": "标签框",
+      "sel": "input.tag-input, .tag-input-ctn",
+      "why": "10 个标签；丢过大肥鱼"
+    },
+    {
+      "key": "提交按钮",
+      "sel": ".submit-btn, button.submit, .bcc-btn-primary",
+      "why": "提交；点了没反应时先 hit 查谁挡着"
+    },
+    {
+      "key": "错误提示",
+      "sel": ".bcc-error, .error-tip, .bcc-tips-box",
+      "why": "一闪而过的红字提示（第①类，轮询必漏）"
+    },
+    {
+      "key": "成功/失败弹窗",
+      "sel": ".bcc-dialog, .bcc-message",
+      "why": "插入几秒就移除（第③类）"
+    }
+  ],
+  "groups": {
+    "完整": [
+      "创作声明下拉",
+      "下拉选项列表",
+      "稿件标题",
+      "视频文件项",
+      "真·上传控件",
+      "分区选择",
+      "标签框",
+      "提交按钮",
+      "错误提示",
+      "成功/失败弹窗"
+    ],
+    "看提示": [
+      "错误提示",
+      "成功/失败弹窗"
+    ],
+    "这下拉": [
+      "创作声明下拉",
+      "下拉选项列表",
+      "错误提示",
+      "成功/失败弹窗"
+    ],
+    "换视频": [
+      "视频文件项",
+      "真·上传控件",
+      "稿件标题",
+      "提交按钮",
+      "错误提示",
+      "成功/失败弹窗"
+    ],
+    "投稿前": [
+      "稿件标题",
+      "视频文件项",
+      "分区选择",
+      "标签框",
+      "提交按钮",
+      "错误提示",
+      "成功/失败弹窗"
+    ]
+  }
+}
