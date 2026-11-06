@@ -17,14 +17,40 @@ import { dirname, join, resolve } from 'node:path';
 import { connect, readBrowserEndpoint } from './cdp.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const root = resolve(here, '..', '..');
-const TEST_PAGE = join(root, 'scratch', '2026-11-05-eye-test', 'page.html');
-const OUT = join(root, 'scratch', '2026-11-05-eye-test');
 
-if (!existsSync(TEST_PAGE)) {
-  console.error(`找不到测试页 ${TEST_PAGE}`);
+// 测试页位置。以前写死 resolve(here,'..','..')，但这个脚本会被搬来搬去
+//（发布时放在 scratch/<日期>-github-daily/event-eye，本地又在别处），
+// 目录一变就拼出 scratch/scratch/... 找不到文件。现在两种都试，并允许环境变量覆盖。
+const TEST_REL = join('scratch', '2026-11-05-eye-test');
+const candidates = [
+  process.env.EYE_TEST_DIR,
+  // 脚本就在 workspace/scratch/<日期>/event-eye 里：往上退两级到 scratch
+  resolve(here, '..', '..'),
+  // 脚本被放在更浅的目录：往上找到含 scratch 的那层
+  resolve(here, '..'),
+  resolve(here, '..', '..', '..'),
+].filter(Boolean);
+
+const findTestDir = () => {
+  for (const base of candidates) {
+    if (/eyes?-test$|2026-11-05-eye-test/i.test(base)) {
+      const page = join(base, 'page.html');
+      if (existsSync(page)) return { dir: base, page };
+    }
+    const page = join(base, TEST_REL, 'page.html');
+    if (existsSync(page)) return { dir: join(base, TEST_REL), page };
+  }
+  return null;
+};
+
+const found = findTestDir();
+if (!found) {
+  console.error('找不到测试页。试过这些位置：\n' + candidates.map((c) => '  ' + c).join('\n'));
+  console.error('可用 EYE_TEST_DIR 指向 2026-11-05-eye-test 目录。');
   process.exit(1);
 }
+const TEST_PAGE = found.page;
+const OUT = found.dir;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const pass = [], fail = [];
